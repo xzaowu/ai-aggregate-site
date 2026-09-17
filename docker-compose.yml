@@ -1,0 +1,105 @@
+# =============================================================================
+# AI Aggregate Site — Docker Compose local-build deployment
+#
+# 架构：反向代理 + MySQL + Docker Compose（App 服务）
+#
+# 单域名部署（推荐）：
+#   https://your-domain.example
+#     /     → reverse proxy → 127.0.0.1:3000 (Docker Web)
+#     /api/ → reverse proxy → 127.0.0.1:4000 (Docker API)
+#
+# 数据库：
+#   MySQL may run outside Docker or as a separately managed service.
+#   在 .env 中配置 DATABASE_URL 指向宿主机 MySQL。
+#
+# 安全：
+#   端口仅绑定 127.0.0.1，不直接暴露到公网。
+#   Put TLS and public routing at the deployment's reverse proxy.
+#
+# 使用方式：
+#   1. cp .env.docker.example .env
+#   2. 编辑 .env，填入真实配置
+#   3. docker compose up -d --build
+#   4. Open the configured web origin and complete /setup when required.
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # API 服务 — Fastify 后端
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # 本地构建镜像，不推送注册表；因此不设置 image 字段以避免 pull 警告
+    container_name: ai-aggregate-api
+    command:
+      - /bin/sh
+      - ./scripts/docker-api-start.sh
+    ports:
+      - "127.0.0.1:4000:4000"
+    env_file:
+      - .env
+    environment:
+      - API_HOST=0.0.0.0
+      - API_PORT=4000
+      - PUBLIC_WEB_URL
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - -qO-
+        - http://127.0.0.1:4000/health
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - app-network
+    # Linux deployments may need this host gateway for a host database:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ---------------------------------------------------------------------------
+  # Web 服务 — Next.js 前端
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # 构建时嵌入 Next.js；默认 /api（单域名部署）
+        # For a separate API origin, use a complete URL such as
+        # https://api.your-domain.example.
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-/api}
+    # 本地构建镜像，不推送注册表；因此不设置 image 字段以避免 pull 警告
+    container_name: ai-aggregate-web
+    command:
+      - /bin/sh
+      - ./scripts/docker-web-start.sh
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file:
+      - .env
+    environment:
+      - API_PORT=4000
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - -qO-
+        - http://127.0.0.1:3000/
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -1,0 +1,14 @@
+node_modules
+.next
+dist
+coverage
+.env
+.env.local
+*.log
+.codex/logs
+prisma/dev.db
+*.tsbuildinfo
+apps/web/tsconfig.tsbuildinfo
+apps/api/tsconfig.tsbuildinfo
+packages/*/tsconfig.tsbuildinfo-
+/storage/generated-assets/

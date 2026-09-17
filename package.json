@@ -1,0 +1,34 @@
+{
+  "name": "ai-aggregate-site",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.12.1",
+  "scripts": {
+    "dev": "corepack pnpm -r --parallel --filter @ai-aggregate/web --filter @ai-aggregate/api dev",
+    "build": "corepack pnpm -r build",
+    "start": "corepack pnpm -r --parallel --filter @ai-aggregate/web --filter @ai-aggregate/api start",
+    "start:web": "corepack pnpm --filter @ai-aggregate/web start",
+    "start:api": "corepack pnpm --filter @ai-aggregate/api start",
+    "typecheck": "corepack pnpm -r typecheck",
+    "test": "corepack pnpm -r test",
+    "lint": "corepack pnpm -r lint",
+    "check:deploy": "tsx scripts/check-deploy.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "prisma db seed"
+  },
+  "dependencies": {
+    "@ai-aggregate/shared": "workspace:*",
+    "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3"
+  },
+  "devDependencies": {
+    "prisma": "^6.9.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

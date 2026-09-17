@@ -1,0 +1,2 @@
+ALTER TABLE `AiModel`
+  ADD COLUMN `maxReferenceImages` INTEGER NOT NULL DEFAULT 1;

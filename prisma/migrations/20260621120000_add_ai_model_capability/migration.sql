@@ -1,0 +1,1 @@
+ALTER TABLE `AiModel` ADD COLUMN `capability` VARCHAR(20) NOT NULL DEFAULT 'chat';

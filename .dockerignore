@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Dependencies (installed in Docker)
+node_modules
+.pnpm-store
+
+# Build outputs (rebuilt in Docker)
+.next
+dist
+*.tsbuildinfo
+
+# Tests & coverage
+coverage
+test-results
+
+# Environment files (never bake into image)
+.env
+.env.local
+.env.*.local
+# Keep .env.example and .env.docker.example trackable — they contain no secrets
+
+# Logs & debug
+logs
+*.log
+npm-debug.log
+pnpm-debug.log
+.codex
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docs (not needed at build time)
+docs/
+README.md

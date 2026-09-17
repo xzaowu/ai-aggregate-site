@@ -1,0 +1,706 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserTokenKind {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+enum ModelProvider {
+  OPENAI_COMPATIBLE
+  SUB2API
+  NEW_API
+}
+
+enum UsageEventType {
+  CHAT_COMPLETION
+  CREDIT_ADJUSTMENT
+}
+
+enum UsageLogStatus {
+  SUCCESS
+  FAILED
+}
+
+enum UsageLogAttemptStatus {
+  STARTED
+  SUCCEEDED
+  FAILED
+  UNKNOWN
+  ABORTED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum PaymentAttemptStatus {
+  ACTIVE
+  RETIRED
+  PAID
+  PAID_REQUIRES_REVIEW
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum AiTaskType {
+  IMAGE
+  VIDEO
+  PPT
+  DOCUMENT
+}
+
+enum AiTaskStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+enum AiAssetType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+enum CreditReservationStatus {
+  RESERVED
+  SETTLED
+  RELEASED
+}
+
+enum CreditReservationKind {
+  IMAGE_GENERATION
+  VIDEO_GENERATION
+  CHAT_COMPLETION
+  CHAT_STREAM
+}
+
+enum IdempotencyOwnerType {
+  USER
+  GUEST
+}
+
+enum IdempotencyRequestStatus {
+  CLAIMED
+  IN_PROGRESS
+  SUCCEEDED
+  FAILED
+}
+
+enum StorageProvider {
+  LOCAL
+  S3_COMPATIBLE
+}
+
+enum StorageObjectSource {
+  UPLOAD
+  GENERATED
+  IMPORTED
+}
+
+enum StorageObjectStatus {
+  PENDING
+  READY
+  FAILED
+  DELETED
+}
+
+model User {
+  id                    String                   @id @default(cuid())
+  email                 String                   @unique
+  passwordHash          String
+  emailVerifiedAt       DateTime?
+  sessionVersion        Int                      @default(0)
+  lastLoginAt           DateTime?
+  name                  String?
+  avatarUrl             String?                  @db.VarChar(500)
+  avatarStorageObjectId String?                  @db.VarChar(191)
+  role                  UserRole                 @default(USER)
+  credits               Int                      @default(1000)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  tokens                UserToken[]
+  chatSessions          ChatSession[]
+  creatorCanvasDocuments CreatorCanvasDocument[]
+  usageEvents           UsageEvent[]
+  quota                 UserQuota?
+  usageLogs             UsageLog[]
+  orders                Order[]
+  feedbacks             Feedback[]
+  aiTasks               AiTask[]
+  aiAssets              AiAsset[]
+  storageSubscription   UserStorageSubscription?
+  dailyCheckIns         DailyCheckIn[]
+  referralCode          ReferralCode?
+  sentReferrals         ReferralRelation[]       @relation("ReferralInviter")
+  receivedReferral      ReferralRelation?        @relation("ReferralInvitee")
+  accountLedgers        AccountLedger[]
+  creditEvents          AccountCreditEvent[]
+  creditReservations    CreditReservation[]
+  storageObjects        StorageObject[]          @relation("StorageObjectOwner")
+  avatarStorageObject   StorageObject?           @relation("UserAvatarStorageObject", fields: [avatarStorageObjectId], references: [id], onDelete: SetNull)
+
+  @@index([avatarStorageObjectId])
+}
+
+model UserToken {
+  id        String        @id @default(cuid())
+  userId    String
+  kind      UserTokenKind
+  tokenHash String        @unique @db.Char(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, kind])
+  @@index([expiresAt])
+}
+
+model ChatSession {
+  id        String        @id @default(cuid())
+  userId    String
+  title     String        @default("新会话")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  ChatMessage[]
+  usageLogs UsageLog[]
+
+  @@index([userId, updatedAt])
+}
+
+model CreatorCanvasDocument {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String?  @db.VarChar(200)
+  state     Json
+  revision  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+}
+
+model ChatMessage {
+  id        String      @id @default(cuid())
+  sessionId String
+  role      String
+  content   String      @db.Text
+  model     String
+  createdAt DateTime    @default(now())
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
+
+model AiModel {
+  id                String             @id @default(cuid())
+  name              String
+  displayName       String?            @db.VarChar(100)
+  slug              String             @unique
+  provider          ModelProvider
+  providerAccountId String?
+  providerAccount   AiProviderAccount? @relation(fields: [providerAccountId], references: [id], onDelete: SetNull)
+  capability        String             @default("chat") @db.VarChar(20)
+  displaySurfaces   Json?
+  imageInvokeMode   String?            @db.VarChar(50)
+  imageOutputParser String?            @db.VarChar(50)
+  maxReferenceImages Int               @default(1)
+  modelId           String
+  enabled           Boolean            @default(true)
+  creditCost        Int                @default(1)
+  allowGuest        Boolean            @default(true)
+  sortOrder         Int                @default(0)
+  group             String             @default("advanced") @db.VarChar(50)
+  tags              String             @default("") @db.VarChar(255)
+  shortDescription  String?            @db.VarChar(255)
+  isRecommended     Boolean            @default(false)
+  inputCost         Int                @default(0)
+  outputCost        Int                @default(0)
+  iconUrl           String?            @db.VarChar(500)
+  iconText          String?            @db.VarChar(10)
+  iconColor         String?            @db.VarChar(50)
+  description       String?            @db.Text
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  usageEvents       UsageEvent[]
+  routes            AiModelRoute[]
+
+  @@index([enabled, sortOrder])
+  @@index([providerAccountId])
+  @@index([sortOrder])
+}
+
+model AiProviderAccount {
+  id           String         @id @default(cuid())
+  name         String
+  providerType String         @db.VarChar(50)
+  baseUrl      String         @db.VarChar(500)
+  apiKey       String         @db.Text
+  capabilities Json
+  enabled      Boolean        @default(true)
+  priority     Int            @default(0)
+  timeoutMs    Int            @default(60000)
+  headersJson  Json?
+  configJson   Json?
+  notes        String?        @db.Text
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  models       AiModel[]
+  modelRoutes  AiModelRoute[]
+
+  @@index([enabled, priority])
+  @@index([providerType])
+}
+
+model AiModelRoute {
+  id            String            @id @default(cuid())
+  modelId       String
+  providerId    String
+  upstreamModel String            @db.VarChar(255)
+  priority      Int               @default(0)
+  enabled       Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  model         AiModel           @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  provider      AiProviderAccount @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([modelId, providerId, upstreamModel])
+  @@index([modelId, enabled, priority])
+  @@index([providerId, enabled, priority])
+}
+
+model Plan {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String?  @unique
+  price       Int
+  credits     Int
+  description String?  @db.Text
+  features    Json
+  enabled     Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  highlighted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      Order[]
+
+  @@index([enabled, sortOrder])
+  @@index([sortOrder])
+}
+
+model SiteSetting {
+  key         String   @id @db.VarChar(100)
+  value       String   @db.Text
+  type        String   @default("string") @db.VarChar(20)
+  description String?  @db.Text
+  updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id              String           @id @default(cuid())
+  userId          String
+  planId          String
+  amount          Int
+  credits         Int
+  status          OrderStatus      @default(PENDING)
+  paymentProvider String?
+  paymentType     String?
+  paymentTradeNo  String?
+  providerTradeNo String?
+  paymentUrl      String?          @db.Text
+  paidAt          DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan            Plan             @relation(fields: [planId], references: [id], onDelete: Restrict)
+  paymentAttempts PaymentAttempt[]
+
+  @@unique([paymentTradeNo])
+  @@unique([providerTradeNo])
+  @@index([userId, createdAt])
+  @@index([planId, createdAt])
+  @@index([status, createdAt])
+}
+
+model PaymentAttempt {
+  id                        String               @id @default(cuid())
+  orderId                   String
+  ordinal                   Int
+  provider                  String               @db.VarChar(20)
+  providerMerchantRef       String               @db.VarChar(191)
+  paymentType               String               @db.VarChar(20)
+  merchantTradeNo           String               @unique @db.VarChar(191)
+  providerTradeNo           String?              @db.VarChar(191)
+  providerTradeIdentityHash Bytes?               @unique @db.Binary(32)
+  status                    PaymentAttemptStatus @default(ACTIVE)
+  paidAt                    DateTime?
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+  order                     Order                @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([orderId, ordinal])
+  @@index([orderId, status, createdAt])
+  @@index([status, createdAt])
+  @@index([provider, providerMerchantRef, providerTradeNo])
+}
+
+model UsageEvent {
+  id           String         @id @default(cuid())
+  userId       String
+  modelId      String?
+  type         UsageEventType
+  credits      Int
+  promptTokens Int            @default(0)
+  outputTokens Int            @default(0)
+  createdAt    DateTime       @default(now())
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  model        AiModel?       @relation(fields: [modelId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([modelId])
+}
+
+model UserQuota {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  remainingCredits Int      @default(20)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([remainingCredits])
+}
+
+model UserStorageSubscription {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  priceCredits     Int
+  durationDays     Int
+  startsAt         DateTime
+  expiresAt        DateTime
+  autoRenewEnabled Boolean  @default(false)
+  lastRequestKey   String?  @unique @db.VarChar(191)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+model DailyCheckIn {
+  id            String   @id @default(cuid())
+  userId        String
+  checkInDate   String   @db.VarChar(10)
+  streakDay     Int
+  rewardCredits Int
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, checkInDate])
+  @@index([userId, checkInDate])
+}
+
+model ReferralCode {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  code      String   @unique @db.VarChar(32)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ReferralRelation {
+  id        String   @id @default(cuid())
+  inviterId String
+  inviteeId String   @unique
+  codeId    String?
+  createdAt DateTime @default(now())
+  inviter   User     @relation("ReferralInviter", fields: [inviterId], references: [id], onDelete: Cascade)
+  invitee   User     @relation("ReferralInvitee", fields: [inviteeId], references: [id], onDelete: Cascade)
+
+  @@unique([inviterId, inviteeId])
+  @@index([inviterId, createdAt])
+}
+
+model AccountLedger {
+  id              String    @id @default(cuid())
+  userId          String
+  kind            String    @db.VarChar(50)
+  title           String    @db.VarChar(255)
+  creditsDelta    Int
+  amount          Int?
+  status          String    @db.VarChar(20)
+  idempotencyKey  String?   @unique @db.VarChar(191)
+  relatedRecordId String?   @db.VarChar(191)
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([kind, createdAt])
+}
+
+model AccountCreditEvent {
+  id             String   @id @default(cuid())
+  userId         String
+  deltaCredits   Int
+  balanceBefore  Int
+  balanceAfter   Int
+  sourceType     String   @db.VarChar(64)
+  sourceId       String   @db.VarChar(191)
+  idempotencyKey String   @unique @db.VarChar(191)
+  createdAt      DateTime @default(now())
+  metadata       Json?
+  user           User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId, createdAt])
+  @@index([sourceType, sourceId])
+}
+
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  adminUserId String
+  adminEmail  String
+  action      String   @db.VarChar(50)
+  targetType  String   @db.VarChar(50)
+  targetId    String?  @db.VarChar(100)
+  summary     String   @db.VarChar(500)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([adminUserId, createdAt])
+  @@index([action, createdAt])
+  @@index([createdAt])
+}
+
+model Feedback {
+  id            String         @id @default(cuid())
+  userId        String?
+  userEmail     String?
+  type          String         @db.VarChar(20)
+  content       String         @db.Text
+  screenshotUrl String?        @db.VarChar(500)
+  status        FeedbackStatus @default(OPEN)
+  archivedAt    DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user          User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([archivedAt, createdAt])
+  @@index([userId, createdAt])
+}
+
+model PaymentSetting {
+  id           String   @id @default(cuid())
+  provider     String   @unique @db.VarChar(20)
+  enabled      Boolean  @default(false)
+  gatewayUrl   String?
+  pid          String?
+  encryptedKey String?  @db.Text
+  notifyUrl    String?
+  returnUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model AiTask {
+  id                 String              @id @default(cuid())
+  userId             String
+  type               AiTaskType
+  status             AiTaskStatus        @default(PENDING)
+  modelId            String?
+  prompt             String              @db.Text
+  input              Json
+  output             Json?
+  costCredits        Int                 @default(0)
+  errorMessage       String?             @db.Text
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  completedAt        DateTime?
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assets             AiAsset[]
+  creditReservation  CreditReservation?
+  idempotencyRequest IdempotencyRequest?
+
+  @@index([userId, createdAt])
+  @@index([userId, type, status, createdAt])
+  @@index([status, createdAt])
+}
+
+model IdempotencyRequest {
+  id                 String                   @id @default(cuid())
+  scope              String                   @db.VarChar(64)
+  ownerType          IdempotencyOwnerType
+  ownerKeyHash       Bytes                    @db.Binary(32)
+  idempotencyKeyHash Bytes                    @db.Binary(32)
+  requestFingerprint Bytes                    @db.Binary(32)
+  status             IdempotencyRequestStatus @default(CLAIMED)
+  claimTokenHash     Bytes?                   @db.Binary(32)
+  claimExpiresAt     DateTime?
+  aiTaskId           String?                  @unique
+  responseStatus     Int?
+  responseCode       String?                  @db.VarChar(64)
+  expiresAt          DateTime?
+  completedAt        DateTime?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  aiTask             AiTask?                  @relation(fields: [aiTaskId], references: [id], onDelete: SetNull)
+
+  @@unique([scope, ownerType, ownerKeyHash, idempotencyKeyHash], map: "IdempotencyRequest_scope_owner_key_key")
+  @@index([status, updatedAt])
+  @@index([status, expiresAt])
+  @@index([status, claimExpiresAt])
+}
+
+model GlobalBudgetPeriod {
+  scope           String   @db.VarChar(64)
+  periodType      String   @db.VarChar(16)
+  periodKey       String   @db.VarChar(10)
+  budgetCredits   BigInt
+  consumedCredits BigInt   @default(0)
+  createdAt       DateTime @default(now()) @db.DateTime(3)
+  updatedAt       DateTime @updatedAt @db.DateTime(3)
+
+  @@id([scope, periodType, periodKey])
+}
+
+model CreditReservation {
+  id                       String                  @id @default(cuid())
+  userId                   String
+  kind                     CreditReservationKind
+  amountCredits            Int
+  status                   CreditReservationStatus @default(RESERVED)
+  expiresAt                DateTime
+  settledAt                DateTime?
+  releasedAt               DateTime?
+  requestId                String?                 @unique @db.VarChar(191)
+  providerAttemptStartedAt DateTime?
+  aiTaskId                 String?                 @unique
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  user                     User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  aiTask                   AiTask?                 @relation(fields: [aiTaskId], references: [id], onDelete: SetNull)
+  usageLogs                UsageLog[]
+
+  @@index([userId, status])
+  @@index([status, expiresAt])
+}
+
+model StorageObject {
+  id              String              @id @default(cuid())
+  userId          String
+  storageProvider StorageProvider
+  objectKey       String              @db.VarChar(512)
+  mimeType        String?             @db.VarChar(100)
+  sizeBytes       BigInt?
+  sha256          String?             @db.Char(64)
+  source          StorageObjectSource
+  status          StorageObjectStatus @default(PENDING)
+  expiresAt       DateTime?           @db.DateTime(3)
+  deletedAt       DateTime?           @db.DateTime(3)
+  createdAt       DateTime            @default(now()) @db.DateTime(3)
+  updatedAt       DateTime            @updatedAt @db.DateTime(3)
+  user            User                @relation("StorageObjectOwner", fields: [userId], references: [id], onDelete: Cascade)
+  avatarUsers     User[]              @relation("UserAvatarStorageObject")
+  assets          AiAsset[]
+
+  @@unique([storageProvider, objectKey])
+  @@index([userId, sha256])
+  @@index([status, expiresAt])
+  @@index([userId, status, createdAt])
+}
+
+model AiAsset {
+  id              String         @id @default(cuid())
+  userId          String
+  taskId          String?
+  storageObjectId String?        @unique
+  type            AiAssetType
+  url             String         @db.Text
+  thumbnailUrl    String?
+  title           String?
+  metadata        Json?
+  createdAt       DateTime       @default(now())
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task            AiTask?        @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  storageObject   StorageObject? @relation(fields: [storageObjectId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([userId, type, createdAt])
+  @@index([taskId])
+  @@index([storageObjectId])
+}
+
+model Link {
+  id          String   @id @default(cuid())
+  title       String   @db.VarChar(100)
+  url         String   @db.VarChar(500)
+  description String?  @db.VarChar(255)
+  category    String   @db.VarChar(20)
+  enabled     Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category, enabled, sortOrder])
+  @@index([enabled, sortOrder])
+}
+
+model UsageLog {
+  id                 String                 @id @default(cuid())
+  userId             String?
+  sessionId          String?
+  model              String
+  canonicalModel     String?                @db.VarChar(255)
+  providerId         String?                @db.VarChar(191)
+  providerName       String?                @db.VarChar(255)
+  upstreamModel      String?                @db.VarChar(255)
+  routeId            String?                @db.VarChar(191)
+  fallbackAttempts   Int                    @default(0)
+  status             UsageLogStatus
+  attemptStatus      UsageLogAttemptStatus?
+  attemptCompletedAt DateTime?
+  costCredits        Int                    @default(0)
+  errorMessage       String?                @db.Text
+  guestIp            String?                @db.VarChar(128)
+  guestUsageDate     String?                @db.VarChar(10)
+  reservationId      String?
+  requestId          String?
+  attemptIndex       Int?
+  createdAt          DateTime               @default(now())
+  user               User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  session            ChatSession?           @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  reservation        CreditReservation?     @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+
+  @@unique([requestId, attemptIndex])
+  @@index([userId, createdAt])
+  @@index([sessionId, createdAt])
+  @@index([status, createdAt])
+  @@index([guestIp, guestUsageDate])
+  @@index([reservationId, createdAt])
+}

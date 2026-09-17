@@ -1,0 +1,202 @@
+{
+  "benchmarkVersion": "tc-r6.0a-title-cover-baseline-v1",
+  "contractVersion": "title-cover-benchmark-result-v1",
+  "fixedImageConfig": {
+    "size": "1280x720",
+    "count": 1
+  },
+  "cases": [
+    {
+      "caseId": "tc-r6-0a-001",
+      "category": "AI 工具类",
+      "originalTitle": "普通人也能用的 5 个 AI 工具，工作效率直接翻倍",
+      "style": "minimal-modern",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "none",
+      "referenceFixtureId": null,
+      "referenceFixtureExpectedPath": null,
+      "notes": "测试常见 AI 工具主题与较长中文标题的语义提取。"
+    },
+    {
+      "caseId": "tc-r6-0a-002",
+      "category": "AI 工具类",
+      "originalTitle": "ChatGPT 工作流实战：从想法到成稿只用 10 分钟",
+      "style": "energetic-motion",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "fixture",
+      "referenceFixtureId": "tc-r6-ref-01",
+      "referenceFixtureExpectedPath": "evals/title-cover/fixtures/references/tc-r6-ref-01.png",
+      "notes": "测试具体工具、流程和时间信息同时出现时的场景抽象。"
+    },
+    {
+      "caseId": "tc-r6-0a-003",
+      "category": "AI 工具类",
+      "originalTitle": "AI 图片工具横评：新手最值得先学哪一个",
+      "style": "professional-business",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "none",
+      "referenceFixtureId": null,
+      "referenceFixtureExpectedPath": null,
+      "notes": "测试工具评测主题，但不把标题中的评测文字作为画面文案。"
+    },
+    {
+      "caseId": "tc-r6-0a-004",
+      "category": "AI 副业类",
+      "originalTitle": "下班后用 AI 做副业：从第一个客户开始",
+      "style": "warm-editorial",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "fixture",
+      "referenceFixtureId": "tc-r6-ref-02",
+      "referenceFixtureExpectedPath": "evals/title-cover/fixtures/references/tc-r6-ref-02.png",
+      "notes": "测试工作与副业并置时的生活化场景选择。"
+    },
+    {
+      "caseId": "tc-r6-0a-005",
+      "category": "AI 副业类",
+      "originalTitle": "一个人做 AI 内容号，30 天能走到哪一步",
+      "style": "minimal-modern",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "fixture",
+      "referenceFixtureId": "tc-r6-ref-03",
+      "referenceFixtureExpectedPath": "evals/title-cover/fixtures/references/tc-r6-ref-03.png",
+      "notes": "测试个人创作者、持续过程和阶段性目标的组合语义。"
+    },
+    {
+      "caseId": "tc-r6-0a-006",
+      "category": "AI 副业类",
+      "originalTitle": "不会编程也能做的 AI 小生意，先从这三步开始",
+      "style": "energetic-motion",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "none",
+      "referenceFixtureId": null,
+      "referenceFixtureExpectedPath": null,
+      "notes": "测试低技术门槛、创业行动和步骤感的视觉抽象。"
+    },
+    {
+      "caseId": "tc-r6-0a-007",
+      "category": "教程类",
+      "originalTitle": "零基础学会用 AI 做一份完整的市场调研",
+      "style": "professional-business",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "fixture",
+      "referenceFixtureId": "tc-r6-ref-04",
+      "referenceFixtureExpectedPath": "evals/title-cover/fixtures/references/tc-r6-ref-04.png",
+      "notes": "测试从零开始、研究流程和专业主题的构图空间。"
+    },
+    {
+      "caseId": "tc-r6-0a-008",
+      "category": "教程类",
+      "originalTitle": "AI 短视频脚本教程：把一句想法变成可拍内容",
+      "style": "warm-editorial",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "none",
+      "referenceFixtureId": null,
+      "referenceFixtureExpectedPath": null,
+      "notes": "测试从抽象想法到内容制作的转化过程。"
+    },
+    {
+      "caseId": "tc-r6-0a-009",
+      "category": "教程类",
+      "originalTitle": "用 AI 整理读书笔记，我的完整工作流",
+      "style": "minimal-modern",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "none",
+      "referenceFixtureId": null,
+      "referenceFixtureExpectedPath": null,
+      "notes": "测试个人方法分享、阅读和整理工具之间的关系。"
+    },
+    {
+      "caseId": "tc-r6-0a-010",
+      "category": "对比类",
+      "originalTitle": "ChatGPT 和 Claude 怎么选：真实工作场景对比",
+      "style": "energetic-motion",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "fixture",
+      "referenceFixtureId": "tc-r6-ref-05",
+      "referenceFixtureExpectedPath": "evals/title-cover/fixtures/references/tc-r6-ref-05.png",
+      "notes": "测试双对象比较主题与真实工作场景的视觉组织。"
+    },
+    {
+      "caseId": "tc-r6-0a-011",
+      "category": "对比类",
+      "originalTitle": "AI 搜索 vs 传统搜索，谁更适合做资料整理",
+      "style": "professional-business",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "none",
+      "referenceFixtureId": null,
+      "referenceFixtureExpectedPath": null,
+      "notes": "测试抽象工具类别对照和资料整理语义。"
+    },
+    {
+      "caseId": "tc-r6-0a-012",
+      "category": "对比类",
+      "originalTitle": "三款 AI 写作工具实测：速度、质量和成本",
+      "style": "warm-editorial",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "fixture",
+      "referenceFixtureId": "tc-r6-ref-06",
+      "referenceFixtureExpectedPath": "evals/title-cover/fixtures/references/tc-r6-ref-06.png",
+      "notes": "测试多对象比较和多个评价维度同时出现时的层级处理。"
+    },
+    {
+      "caseId": "tc-r6-0a-013",
+      "category": "产品类",
+      "originalTitle": "这款 AI 助手适合谁：从功能到实际体验",
+      "style": "minimal-modern",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "fixture",
+      "referenceFixtureId": "tc-r6-ref-07",
+      "referenceFixtureExpectedPath": "evals/title-cover/fixtures/references/tc-r6-ref-07.png",
+      "notes": "测试产品体验、目标用户和功能认知的平衡。"
+    },
+    {
+      "caseId": "tc-r6-0a-014",
+      "category": "产品类",
+      "originalTitle": "我的第一个 AI 产品：从需求验证到上线",
+      "style": "energetic-motion",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "none",
+      "referenceFixtureId": null,
+      "referenceFixtureExpectedPath": null,
+      "notes": "测试产品创建过程与时间线语义。"
+    },
+    {
+      "caseId": "tc-r6-0a-015",
+      "category": "人物/故事类",
+      "originalTitle": "一个自由职业者的 AI 转型故事",
+      "style": "professional-business",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "fixture",
+      "referenceFixtureId": "tc-r6-ref-08",
+      "referenceFixtureExpectedPath": "evals/title-cover/fixtures/references/tc-r6-ref-08.png",
+      "notes": "测试人物主体、职业变化和叙事性场景。"
+    },
+    {
+      "caseId": "tc-r6-0a-016",
+      "category": "人物/故事类",
+      "originalTitle": "他用 AI 重做自己的工作：一个月后的真实变化",
+      "style": "warm-editorial",
+      "size": "1280x720",
+      "count": 1,
+      "referenceMode": "none",
+      "referenceFixtureId": null,
+      "referenceFixtureExpectedPath": null,
+      "notes": "测试单人物故事、工作变化和结果导向的表达。"
+    }
+  ]
+}

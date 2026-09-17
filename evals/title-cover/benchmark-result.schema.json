@@ -1,0 +1,319 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-aggregate.local/schemas/title-cover/benchmark-result-v1.json",
+  "title": "Title Cover Benchmark Result",
+  "description": "One non-production Title Cover benchmark result for one case and repeat.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "identity",
+    "visualBrief",
+    "image",
+    "evaluation"
+  ],
+  "properties": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "benchmarkVersion",
+        "caseId",
+        "repeatIndex",
+        "timestamp"
+      ],
+      "properties": {
+        "benchmarkVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "caseId": {
+          "type": "string",
+          "pattern": "^tc-r6-0a-[0-9]{3}$"
+        },
+        "repeatIndex": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "visualBrief": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "logicalModelId",
+        "providerId",
+        "providerName",
+        "routeId",
+        "upstreamModel",
+        "providerCallCount",
+        "fallbackAttempts",
+        "durationMs",
+        "timeout",
+        "outputCodePoints",
+        "contractVersion"
+      ],
+      "properties": {
+        "logicalModelId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "providerId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "providerName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "routeId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "upstreamModel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "providerCallCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fallbackAttempts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "durationMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timeout": {
+          "type": "boolean"
+        },
+        "outputCodePoints": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "contractVersion": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "imageLogicalModelId",
+        "imageProvider",
+        "imageRouteId",
+        "size",
+        "count",
+        "style",
+        "referenceMode",
+        "totalTaskDurationMs",
+        "generatedBaseArtifactReference"
+      ],
+      "properties": {
+        "imageLogicalModelId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "imageProvider": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "imageRouteId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "size": {
+          "const": "1280x720"
+        },
+        "count": {
+          "const": 1
+        },
+        "style": {
+          "enum": [
+            "minimal-modern",
+            "energetic-motion",
+            "professional-business",
+            "warm-editorial"
+          ]
+        },
+        "referenceMode": {
+          "enum": [
+            "none",
+            "fixture"
+          ]
+        },
+        "totalTaskDurationMs": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "generatedBaseArtifactReference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "semanticRelevance",
+        "compositionUsefulness",
+        "copySafeZone",
+        "thumbnailReadability",
+        "creativeQuality",
+        "paidFeel",
+        "incidentalReadableText",
+        "reviewerMetadata"
+      ],
+      "properties": {
+        "semanticRelevance": {
+          "$ref": "#/$defs/reviewScore"
+        },
+        "compositionUsefulness": {
+          "$ref": "#/$defs/reviewScore"
+        },
+        "copySafeZone": {
+          "$ref": "#/$defs/reviewScore"
+        },
+        "thumbnailReadability": {
+          "$ref": "#/$defs/reviewScore"
+        },
+        "creativeQuality": {
+          "$ref": "#/$defs/reviewScore"
+        },
+        "paidFeel": {
+          "$ref": "#/$defs/reviewScore"
+        },
+        "incidentalReadableText": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "no",
+            "suspected",
+            "yes",
+            null
+          ]
+        },
+        "reviewerMetadata": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "reviewerId",
+                "reviewSetId",
+                "reviewTimestamp",
+                "randomizedOrder",
+                "decision",
+                "invalidSample"
+              ],
+              "properties": {
+                "reviewerId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reviewSetId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reviewTimestamp": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "randomizedOrder": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "AB",
+                    "BA",
+                    null
+                  ]
+                },
+                "decision": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "a",
+                    "b",
+                    "tie",
+                    "invalid",
+                    null
+                  ]
+                },
+                "invalidSample": {
+                  "type": "boolean"
+                },
+                "reviewerExperience": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "reviewNotes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "invalidReason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "reviewScore": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "maximum": 5
+    }
+  }
+}

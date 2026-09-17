@@ -1,0 +1,1 @@
+ALTER TABLE `AiModel` ADD COLUMN `displayName` VARCHAR(100) NULL;
