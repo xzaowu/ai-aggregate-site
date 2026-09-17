@@ -16,6 +16,26 @@ application.
 - Provider, model, and route configuration
 - Tasks, assets, credits, account, and admin surfaces
 
+## Screenshots
+
+### AI Chat
+
+![AI Chat](docs/assets/chat-desktop.png)
+
+### Image Creation
+
+![Image Creation](docs/assets/image-desktop.png)
+
+### Creator Canvas
+
+![Creator Canvas](docs/assets/canvas-desktop.png)
+
+### Mobile
+
+<p align="center">
+  <img src="docs/assets/works-mobile.png" width="320" alt="AI Aggregate Site mobile works view" />
+</p>
+
 ## Repository
 
 ```text

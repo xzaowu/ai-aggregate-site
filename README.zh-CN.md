@@ -15,6 +15,26 @@ AI 聚合站是一个可自托管的多模态 AI 工作空间。它将工作空�
 - Provider / 服务提供方、模型和路由配置
 - 任务、资产、积分、账户和管理后台界面
 
+## 产品截图
+
+### AI 对话
+
+![AI 对话](docs/assets/chat-desktop.png)
+
+### 图像创作
+
+![图像创作](docs/assets/image-desktop.png)
+
+### 创作画布
+
+![创作画布](docs/assets/canvas-desktop.png)
+
+### 移动端
+
+<p align="center">
+  <img src="docs/assets/works-mobile.png" width="320" alt="AI 聚合站移动端作品页面" />
+</p>
+
 ## 仓库
 
 ```text
