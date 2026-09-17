@@ -1,5 +1,7 @@
 # AI 聚合站 / AI Aggregate Site
 
+English | [简体中文](README.zh-CN.md)
+
 AI 聚合站 is a self-hostable multi-modal AI workspace. It connects the
 workspace experience to self-configured Provider accounts while keeping model
 selection, routes, credits, tasks, assets, and account boundaries in the
